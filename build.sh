@@ -1,9 +1,8 @@
-set -o errexit
-echo "--- Installing uv (Build Step) ---"
+#!/usr/bin/env bash
+
 curl -LsSf https://astral.sh/uv/install.sh | sh
-$HOME/.local/bin/env
-uv --version
-echo "--- Installing project dependencies using make install (Build Step) ---"
+export PATH="$HOME/.local/bin:$PATH"
+
 make install
-echo "--- Running database migrations (Build Step) ---"
-psql -a -d $DATABASE_URL -f database.sql
+
+psql -a -d "$DATABASE_URL" -f database.sql
