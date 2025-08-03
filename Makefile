@@ -13,6 +13,7 @@ build:
 
 render-start:
 	uv run python3 page_analyzer/models.py
+	gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
 
 start:
 	gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
