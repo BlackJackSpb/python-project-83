@@ -12,7 +12,7 @@ build:
 	./build.sh
 
 render-start:
-	uv run python models.py
+	uv run python3 page_analyzer/models.py
 
 start:
 	gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
