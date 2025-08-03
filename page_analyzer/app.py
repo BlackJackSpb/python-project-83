@@ -17,28 +17,28 @@ if not app.config['SECRET_KEY']:
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    url_input = request.form.get('url', '')
+    url = request.form.get('url', '')
 
     if request.method == 'POST':
-        if not validators.url(url_input):
+        if not validators.url(url):
             flash('Некорректный URL', 'danger')
             messages = get_flashed_messages(with_categories=True)
             return render_template(
                 'index.html',
-                url_input=url_input,
+                url=url,
                 messages=messages
                 ), 422
 
-        if len(url_input) > 255:
+        if len(url) > 255:
             flash('URL превышает 255 символов', 'danger')
             messages = get_flashed_messages(with_categories=True)
             return render_template(
                 'index.html',
-                url_input=url_input,
+                url=url,
                 messages=messages
                 ), 422
 
-        parsed_url = urlparse(url_input)
+        parsed_url = urlparse(url)
         normalized_url = f"{parsed_url.scheme}://{parsed_url.netloc}".lower()
 
         existing_url = get_url_by_name(normalized_url)
@@ -55,14 +55,14 @@ def index():
                 messages = get_flashed_messages(with_categories=True)
                 return render_template(
                     'index.html',
-                    url_input=url_input,
+                    url=url,
                     messages=messages
                     ), 500
 
     messages = get_flashed_messages(with_categories=True)
     return render_template(
         'index.html',
-        url_input=url_input,
+        url=url,
         messages=messages
     )
 

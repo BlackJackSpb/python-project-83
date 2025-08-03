@@ -1,27 +1,29 @@
 {% extends "layout.html" %}
-
-{# url[0]=id, url[1]=name, url[2]=created_at #}
-
-{% block title %}Сайт: {{ url[1] }}{% endblock %}
-
+{% block title %}{{ url[1] }}{% endblock %}
 {% block content %}
-  <div class="table-responsive" data-test="url">
-    <h2>Сайт: {{ url[1] }}</h2>
-    <table class="table table-bordered table-hover mt-3">
-        <tbody>
-            <tr>
-                <td>ID</td>
-                <td>{{ url[0] }}</td>
-            </tr>
-            <tr>
-                <td>Имя</td>
-                <td>{{ url[1] }}</td>
-            </tr>
-            <tr>
-                <td>Дата создания</td>
-                <td>{{ url[2].strftime('%Y-%m-%d') }}</td>
-            </tr>
-        </tbody>
-    </table>
-  </div>
+
+    <h1>Сайт: {{ url[1] }}</h1>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover text-nowrap" data-test="url">
+            <tbody>
+                <tr>
+                        <td>ID</td>
+                        <td>{{ url[0] }}</td>
+                </tr>
+                <tr>
+                        <td>Имя</td>
+                        <td>{{ url[1] }}</a></td>
+                </tr>
+                <tr>
+                        <td>Дата создание</td>
+                        <td>{{ url[2] }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <h2 class="mt-5 mb-3">Проверки</h2>
+    <form method="post" action="/urls/1/checks"> {#Потом#}
+        <input type="submit" class="btn btn-primary" value="Запустить проверку">
+    </form>
+    <div>{#Потом#}</div>
 {% endblock %}
