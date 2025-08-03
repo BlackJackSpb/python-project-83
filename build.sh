@@ -1,7 +1,7 @@
 set -o errexit
 echo "--- Installing uv (Build Step) ---"
 curl -LsSf https://astral.sh/uv/install.sh | sh
-.$HOME/.local/bin/env
+$HOME/.local/bin/env
 uv --version
 echo "--- Installing project dependencies using make install (Build Step) ---"
 make install
