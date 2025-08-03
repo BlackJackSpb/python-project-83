@@ -6,6 +6,7 @@ dev:
 build:
 	./build.sh
 render-start:
-	uv run python init_db.py && gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
+	gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
+.PHONY: install dev lint start build render-start
 start:
 	uv run gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
