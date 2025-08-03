@@ -9,7 +9,7 @@ from .models import get_all_urls, get_url_by_name, insert_url, get_url_by_id
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', "your_very_secure_secret_key_here")
 
 if not app.config['SECRET_KEY']:
     raise RuntimeError("SECRET_KEY not set in .env file!")
