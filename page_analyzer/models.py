@@ -164,7 +164,10 @@ def init_db():
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS url_checks (
                     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-                    url_id BIGINT REFERENCES urls (id) ON DELETE CASCADE NOT NULL,
+                    url_id BIGINT
+                        REFERENCES urls (id)
+                        ON DELETE CASCADE
+                        NOT NULL,
                     status_code INTEGER,
                     h1 TEXT,
                     title TEXT,
