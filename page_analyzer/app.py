@@ -22,7 +22,6 @@ if not app.config['SECRET_KEY']:
 
 @app.route('/')
 def index():
-    """Отображает главную страницу с формой добавления URL."""
     messages = get_flashed_messages(with_categories=True)
     return render_template(INDEX, url_input='', messages=messages)
 
