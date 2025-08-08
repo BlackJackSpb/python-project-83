@@ -1,11 +1,11 @@
 import os
-import validators
-from bs4 import BeautifulSoup
 from flask import (Flask, render_template, url_for, request,
                    flash, redirect, get_flashed_messages, abort)
 from dotenv import load_dotenv
-from urllib.parse import urlparse
 import requests
+from .validators import validate_url
+from .parser import parse_seo_data
+from .url_normalyz import normalize_url
 from .models import (get_all_urls, get_url_by_name, insert_url,
                      get_url_by_id, insert_url_check, get_url_checks)
 
@@ -103,32 +103,3 @@ def add_url_check(id):
         flash('Произошла ошибка при проверке', 'danger')
 
     return redirect(url_for('show_url', id=id))
-
-
-def validate_url(url_string):
-    if not url_string:
-        return 'URL обязателен'
-    if len(url_string) > 255:
-        return 'URL превышает 255 символов'
-    if not validators.url(url_string):
-        return 'Некорректный URL'
-    return None
-
-
-def normalize_url(url_string):
-    parsed_url = urlparse(url_string)
-    return f"{parsed_url.scheme}://{parsed_url.netloc}".lower()
-
-
-def parse_seo_data(html_text):
-    soup = BeautifulSoup(html_text, 'lxml')
-    h1_tag = soup.find('h1')
-    h1 = (h1_tag.string.strip()
-          if h1_tag and h1_tag.string else '')
-    title_tag = soup.find('title')
-    title = (title_tag.string.strip()
-             if title_tag and title_tag.string else '')
-    desc_meta = soup.find('meta', attrs={'name': 'description'})
-    description = (desc_meta.get('content', '').strip()
-                   if desc_meta else '')
-    return {'h1': h1, 'title': title, 'description': description}
