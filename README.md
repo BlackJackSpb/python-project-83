@@ -8,8 +8,6 @@
 
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=BlackJackSpb_python-project-83&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=BlackJackSpb_python-project-83)
 
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=BlackJackSpb_python-project-83&metric=coverage)](https://sonarcloud.io/summary/new_code?id=BlackJackSpb_python-project-83)
-
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=BlackJackSpb_python-project-83&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=BlackJackSpb_python-project-83)
 
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=BlackJackSpb_python-project-83&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=BlackJackSpb_python-project-83)
