@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 
+
 def parse_seo_data(html_text):
     soup = BeautifulSoup(html_text, 'lxml')
     h1_tag = soup.find('h1')
