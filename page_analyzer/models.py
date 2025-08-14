@@ -1,5 +1,5 @@
 import os
-import psycopg
+import psycopg2
 from dotenv import load_dotenv
 from datetime import date
 
@@ -9,9 +9,9 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 def get_db_connection():
     try:
-        conn = psycopg.connect(DATABASE_URL)
+        conn = psycopg2.connect(DATABASE_URL)
         return conn
-    except psycopg.Error as e:
+    except psycopg2.Error as e:
         print(f"Ошибка подключения к базе данных: {e}")
         raise
 
@@ -61,7 +61,7 @@ def insert_url(url_name):
             )
             new_url_data = cur.fetchone()
             conn.commit()
-    except psycopg.Error as e:
+    except psycopg2.Error as e:
         conn.rollback()
         print(f"Ошибка вставки URL: {e}")
     finally:
@@ -114,7 +114,7 @@ def insert_url_check(url_id, status_code, h1=None, title=None,
             )
             conn.commit()
             success = True
-    except psycopg.Error as e:
+    except psycopg2.Error as e:
         conn.rollback()
         print(f"Ошибка вставки проверки URL: {e}")
     finally:
@@ -178,7 +178,7 @@ def init_db():
             """)
             conn.commit()
             print("✅ Таблица создана или уже существует.")
-    except psycopg.Error as e:
+    except psycopg2.Error as e:
         print(f"❌ Ошибка при создании таблицы: {e}")
         conn.rollback()
     finally:
