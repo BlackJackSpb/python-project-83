@@ -1,7 +1,6 @@
 import os
 import psycopg2
 from dotenv import load_dotenv
-from datetime import date
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -20,12 +19,11 @@ def get_url_by_id(url_id):
     conn = get_db_connection()
     url_data = None
     try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT id, name, created_at FROM urls WHERE id = %s",
-                (url_id,)
-            )
-            url_data = cur.fetchone()
+        cur = conn.cursor()
+        sql = "SELECT id, name, created_at FROM urls WHERE id = %s"
+        cur.execute(sql, (url_id,))
+        url_data = cur.fetchone()
+        cur.close()
     finally:
         if conn:
             conn.close()
@@ -36,12 +34,11 @@ def get_url_by_name(url_name):
     conn = get_db_connection()
     url_data = None
     try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT id, name, created_at FROM urls WHERE name = %s",
-                (url_name,)
-            )
-            url_data = cur.fetchone()
+        cur = conn.cursor()
+        sql = "SELECT id, name, created_at FROM urls WHERE name = %s"
+        cur.execute(sql, (url_name,))
+        url_data = cur.fetchone()
+        cur.close()
     finally:
         if conn:
             conn.close()
@@ -51,16 +48,14 @@ def get_url_by_name(url_name):
 def insert_url(url_name):
     conn = get_db_connection()
     new_url_data = None
-    today = date.today()
     try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO urls (name, created_at) VALUES"
-                " (%s, %s) RETURNING id, name, created_at",
-                (url_name, today)
-            )
-            new_url_data = cur.fetchone()
-            conn.commit()
+        cur = conn.cursor()
+        sql = ("INSERT INTO urls (name) VALUES (%s) "
+               "RETURNING id, name, created_at")
+        cur.execute(sql, (url_name,))
+        new_url_data = cur.fetchone()
+        conn.commit()
+        cur.close()
     except psycopg2.Error as e:
         conn.rollback()
         print(f"Ошибка вставки URL: {e}")
@@ -74,28 +69,30 @@ def get_all_urls():
     conn = get_db_connection()
     urls_list = []
     try:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                WITH LatestChecks AS (
-                    SELECT
-                        url_id,
-                        created_at,
-                        status_code,
-                        ROW_NUMBER() OVER(PARTITION BY url_id ORDER BY created_at DESC) as rn
-                    FROM url_checks
-                )
+        cur = conn.cursor()
+        sql = """
+            WITH LatestChecks AS (
                 SELECT
-                    u.id,
-                    u.name,
-                    lc.created_at as last_check_date,
-                    lc.status_code as last_check_status_code
-                FROM urls u
-                LEFT JOIN LatestChecks lc ON u.id = lc.url_id AND lc.rn = 1
-                ORDER BY u.id DESC;
-                """
+                    url_id,
+                    created_at,
+                    status_code,
+                    ROW_NUMBER() OVER(
+                        PARTITION BY url_id ORDER BY created_at DESC
+                    ) as rn
+                FROM url_checks
             )
-            urls_list = cur.fetchall()
+            SELECT
+                u.id,
+                u.name,
+                lc.created_at as last_check_date,
+                lc.status_code as last_check_status_code
+            FROM urls u
+            LEFT JOIN LatestChecks lc ON u.id = lc.url_id AND lc.rn = 1
+            ORDER BY u.id DESC;
+            """
+        cur.execute(sql)
+        urls_list = cur.fetchall()
+        cur.close()
     finally:
         if conn:
             conn.close()

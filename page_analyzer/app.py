@@ -14,71 +14,53 @@ INDEX = "index.html"
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv(
-    'SECRET_KEY',
-    "your_very_secure_secret_key_here"
-)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 if not app.config['SECRET_KEY']:
     raise RuntimeError("SECRET_KEY not set in .env file!")
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    url = request.form.get('url', '')
-
-    if request.method == 'POST':
-        if not validators.url(url):
-            flash('Некорректный URL', 'danger')
-            messages = get_flashed_messages(with_categories=True)
-            return render_template(
-                INDEX,
-                url=url,
-                messages=messages
-                ), 422
-
-        if len(url) > 255:
-            flash('URL превышает 255 символов', 'danger')
-            messages = get_flashed_messages(with_categories=True)
-            return render_template(
-                INDEX,
-                url=url,
-                messages=messages
-                ), 422
-
-        parsed_url = urlparse(url)
-        normalized_url = f"{parsed_url.scheme}://{parsed_url.netloc}".lower()
-
-        existing_url = get_url_by_name(normalized_url)
-        if existing_url:
-            flash('Страница уже существует', 'info')
-            return redirect(url_for('show_url', id=existing_url[0]))
-        else:
-            new_url = insert_url(normalized_url)
-            if new_url:
-                flash('Страница успешно добавлена', 'success')
-                return redirect(url_for('show_url', id=new_url[0]))
-            else:
-                flash('Произошла ошибка при добавлении URL', 'danger')
-                messages = get_flashed_messages(with_categories=True)
-                return render_template(
-                    INDEX,
-                    url=url,
-                    messages=messages
-                    ), 500
-
+    """Отображает главную страницу с формой добавления URL."""
     messages = get_flashed_messages(with_categories=True)
-    return render_template(
-        INDEX,
-        url=url,
-        messages=messages
-    )
+    return render_template(INDEX, url_input='', messages=messages)
+
+
+@app.route('/urls', methods=['POST'])
+def add_url():
+    url_input = request.form.get('url', '')
+    error = validate_url(url_input)
+    if error:
+        flash(error, 'danger')
+        messages = get_flashed_messages(with_categories=True)
+        return render_template(
+            INDEX, url_input=url_input, messages=messages
+        ), 422
+
+    normalized_url = normalize_url(url_input)
+    existing_url = get_url_by_name(normalized_url)
+    if existing_url:
+        flash('Страница уже существует', 'info')
+        return redirect(url_for('show_url', id=existing_url[0]))
+    else:
+        new_url = insert_url(normalized_url)
+        if new_url:
+            flash('Страница успешно добавлена', 'success')
+            return redirect(url_for('show_url', id=new_url[0]))
+        else:
+            flash('Произошла ошибка при добавлении URL', 'danger')
+            messages = get_flashed_messages(with_categories=True)
+            return render_template(
+                INDEX, url_input=url_input, messages=messages
+            ), 500
 
 
 @app.route('/urls')
 def list_urls():
     all_urls = get_all_urls()
-    return render_template('urls_index.html', urls=all_urls)
+    messages = get_flashed_messages(with_categories=True)
+    return render_template('urls_index.html', urls=all_urls, messages=messages)
 
 
 @app.route('/urls/<int:id>')
@@ -86,10 +68,14 @@ def show_url(id):
     url_data = get_url_by_id(id)
     if url_data is None:
         abort(404, description="Страница не найдена")
-
     checks_data = get_url_checks(id)
-
-    return render_template('urls_show.html', url=url_data, checks=checks_data)
+    messages = get_flashed_messages(with_categories=True)
+    return render_template(
+        'urls_show.html',
+        url=url_data,
+        checks=checks_data,
+        messages=messages
+    )
 
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
@@ -121,7 +107,6 @@ def add_url_check(id):
 
 
 def validate_url(url_string):
-    """Проверяет URL на корректность и длину."""
     if not url_string:
         return 'URL обязателен'
     if len(url_string) > 255:
@@ -132,13 +117,11 @@ def validate_url(url_string):
 
 
 def normalize_url(url_string):
-    """Нормализует URL (схема + домен, нижний регистр)."""
     parsed_url = urlparse(url_string)
     return f"{parsed_url.scheme}://{parsed_url.netloc}".lower()
 
 
 def parse_seo_data(html_text):
-    """Парсит HTML-текст и извлекает h1, title и description."""
     soup = BeautifulSoup(html_text, 'lxml')
     h1_tag = soup.find('h1')
     h1 = (h1_tag.string.strip()
