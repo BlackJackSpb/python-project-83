@@ -9,6 +9,7 @@ import requests
 from .models import (get_all_urls, get_url_by_name, insert_url,
                      get_url_by_id, insert_url_check, get_url_checks)
 
+INDEX = "index.html"
 
 load_dotenv()
 
@@ -31,7 +32,7 @@ def index():
             flash('Некорректный URL', 'danger')
             messages = get_flashed_messages(with_categories=True)
             return render_template(
-                'index.html',
+                INDEX,
                 url=url,
                 messages=messages
                 ), 422
@@ -40,7 +41,7 @@ def index():
             flash('URL превышает 255 символов', 'danger')
             messages = get_flashed_messages(with_categories=True)
             return render_template(
-                'index.html',
+                INDEX,
                 url=url,
                 messages=messages
                 ), 422
@@ -61,14 +62,14 @@ def index():
                 flash('Произошла ошибка при добавлении URL', 'danger')
                 messages = get_flashed_messages(with_categories=True)
                 return render_template(
-                    'index.html',
+                    INDEX,
                     url=url,
                     messages=messages
                     ), 500
 
     messages = get_flashed_messages(with_categories=True)
     return render_template(
-        'index.html',
+        INDEX,
         url=url,
         messages=messages
     )

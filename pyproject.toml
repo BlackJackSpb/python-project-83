@@ -12,5 +12,4 @@ dependencies = [
     "validators",
     "requests",
     "beautifulsoup4",
-    "lxml"
 ]
