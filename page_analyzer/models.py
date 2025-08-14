@@ -142,20 +142,20 @@ def init_db():
         with conn.cursor() as cur:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS urls (
-                    id serial PRIMARY KEY,
-                    name varchar(255) NOT NULL,
-                    created_at date NOT NULL
+                    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+                    name VARCHAR(255) UNIQUE NOT NULL,
+                    created_at DATE DEFAULT CURRENT_TIMESTAMP
                 );
             """)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS url_checks (
-                    id BIGSERIAL PRIMARY KEY,
-                    url_id BIGINT NOT NULL REFERENCES urls(id) ON DELETE CASCADE,
+                    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+                    url_id BIGINT REFERENCES urls (id) ON DELETE CASCADE NOT NULL,
                     status_code INTEGER,
                     h1 TEXT,
                     title TEXT,
                     description TEXT,
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    created_at DATE DEFAULT CURRENT_TIMESTAMP
                 );
             """)
             conn.commit()
