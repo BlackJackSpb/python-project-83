@@ -140,6 +140,13 @@ def init_db():
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
+            
+            cur.execute("""
+                            DROP TABLE IF EXISTS urls CASCADE;
+            """)
+            cur.execute("""
+                            DROP TABLE IF EXISTS url_checks CASCADE;
+            """)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS urls (
                     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
