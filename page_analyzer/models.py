@@ -147,8 +147,19 @@ def init_db():
                     created_at date NOT NULL
                 );
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS url_checks (
+                    id BIGSERIAL PRIMARY KEY,
+                    url_id BIGINT NOT NULL REFERENCES urls(id) ON DELETE CASCADE,
+                    status_code INTEGER,
+                    h1 TEXT,
+                    title TEXT,
+                    description TEXT,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
             conn.commit()
-            print("✅ Таблица 'urls' создана или уже существует.")
+            print("✅ Таблица 'urls' и 'url_checks' создана или уже существует.")
     except psycopg.Error as e:
         print(f"❌ Ошибка при создании таблицы: {e}")
         conn.rollback()
