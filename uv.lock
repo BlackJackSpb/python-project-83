@@ -163,7 +163,7 @@ requires-dist = [
     { name = "beautifulsoup4" },
     { name = "flask" },
     { name = "gunicorn" },
-    { name = "psycopg2-binary" },
+    { name = "psycopg2-binary", specifier = "==2.9.10" },
     { name = "python-dotenv" },
     { name = "requests" },
     { name = "validators" },
