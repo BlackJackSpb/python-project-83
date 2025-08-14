@@ -77,14 +77,22 @@ def get_all_urls():
         with conn.cursor() as cur:
             cur.execute(
                 """
+                WITH LatestChecks AS (
+                    SELECT
+                        url_id,
+                        created_at,
+                        status_code,
+                        ROW_NUMBER() OVER(PARTITION BY url_id ORDER BY created_at DESC) as rn
+                    FROM url_checks
+                )
                 SELECT
-                    urls.id,
-                    urls.name,
-                    MAX(url_checks.created_at) as last_check_date
-                FROM urls
-                LEFT JOIN url_checks ON urls.id = url_checks.url_id
-                GROUP BY urls.id, urls.name
-                ORDER BY urls.id DESC;
+                    u.id,
+                    u.name,
+                    lc.created_at as last_check_date,
+                    lc.status_code as last_check_status_code
+                FROM urls u
+                LEFT JOIN LatestChecks lc ON u.id = lc.url_id AND lc.rn = 1
+                ORDER BY u.id DESC;
                 """
             )
             urls_list = cur.fetchall()
@@ -94,14 +102,14 @@ def get_all_urls():
     return urls_list
 
 
-def insert_url_check(url_id):
+def insert_url_check(url_id, status_code):
     conn = get_db_connection()
     success = False
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO url_checks (url_id) VALUES (%s)",
-                (url_id,)
+                "INSERT INTO url_checks (url_id, status_code) VALUES (%s, %s)",
+                (url_id, status_code)
             )
             conn.commit()
             success = True
@@ -121,7 +129,9 @@ def get_url_checks(url_id):
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT id, url_id, status_code, h1, title, description, created_at
+                SELECT (
+                    id, url_id, status_code, h1, title, description, created_at
+                )
                 FROM url_checks
                 WHERE url_id = %s
                 ORDER BY id DESC;
@@ -140,7 +150,7 @@ def init_db():
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            
+
             cur.execute("""
                             DROP TABLE IF EXISTS urls CASCADE;
             """)
@@ -166,7 +176,7 @@ def init_db():
                 );
             """)
             conn.commit()
-            print("✅ Таблица 'urls' и 'url_checks' создана или уже существует.")
+            print("✅ Таблица создана или уже существует.")
     except psycopg.Error as e:
         print(f"❌ Ошибка при создании таблицы: {e}")
         conn.rollback()

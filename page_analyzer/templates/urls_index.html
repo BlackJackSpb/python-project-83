@@ -22,10 +22,13 @@
                     <td>
                         {% if url_item[2] %}
                         {{ url_item[2] }}
-                        {% else %}
                         {% endif %}
                     </td>
-                    <td></td>
+                    <td>
+                        {% if url_item[3] is not none %} 
+                        {{ url_item[3] }} 
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

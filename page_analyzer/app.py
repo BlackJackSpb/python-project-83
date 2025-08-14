@@ -4,6 +4,7 @@ from flask import (Flask, render_template, url_for, request,
                    flash, redirect, get_flashed_messages, abort)
 from dotenv import load_dotenv
 from urllib.parse import urlparse
+import requests
 from .models import (get_all_urls, get_url_by_name, insert_url,
                      get_url_by_id, insert_url_check, get_url_checks)
 
@@ -93,13 +94,15 @@ def show_url(id):
 def add_url_check(id):
     url_item = get_url_by_id(id)
     if url_item is None:
-        abort(404, description="URL не найден, проверку добавить нельзя")
+        abort(404, description="URL не найден")
+    url_name = url_item[1]
 
-    success = insert_url_check(id)
-
-    if success:
+    try:
+        response = requests.get(url_name, timeout=10)
+        status_code = response.status_code
+        insert_url_check(id, status_code)
         flash('Страница успешно проверена', 'success')
-    else:
-        flash('Произошла ошибка при проверке страницы', 'danger')
-
+    except requests.exceptions.RequestException as e:
+        print(f"Ошибка при проверке URL {url_name}: {e}")
+        flash('Произошла ошибка при проверке', 'danger')
     return redirect(url_for('show_url', id=id))
