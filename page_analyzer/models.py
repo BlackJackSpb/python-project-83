@@ -102,14 +102,15 @@ def get_all_urls():
     return urls_list
 
 
-def insert_url_check(url_id, status_code):
+def insert_url_check(url_id, status_code, h1=None, title=None,
+                     description=None):
     conn = get_db_connection()
     success = False
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO url_checks (url_id, status_code) VALUES (%s, %s)",
-                (url_id, status_code)
+                "INSERT INTO url_checks (url_id, status_code, h1, title, description) VALUES (%s, %s, %s, %s, %s)",
+                (url_id, status_code, h1, title, description)
             )
             conn.commit()
             success = True

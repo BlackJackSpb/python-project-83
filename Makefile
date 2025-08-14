@@ -3,7 +3,7 @@ PORT ?= 8000
 .PHONY: install dev build render-start start
 
 install:
-	uv sync
+	uv sync --all-extras
 
 dev:
 	uv run flask --debug --app page_analyzer:app run --host 0.0.0.0 --port $(PORT)

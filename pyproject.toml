@@ -8,8 +8,9 @@ dependencies = [
     "Flask",
     "gunicorn",
     "python-dotenv",
-    "psycopg",
-    "psycopg-binary",
+    "psycopg2-binary",
     "validators",
     "requests",
+    "beautifulsoup4",
+    "lxml"
 ]
