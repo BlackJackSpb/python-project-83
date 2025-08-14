@@ -4,12 +4,17 @@ from flask import (Flask, render_template, url_for, request,
                    flash, redirect, get_flashed_messages, abort)
 from dotenv import load_dotenv
 from urllib.parse import urlparse
-from .models import get_all_urls, get_url_by_name, insert_url, get_url_by_id
+from .models import (get_all_urls, get_url_by_name, insert_url,
+                     get_url_by_id, insert_url_check, get_url_checks)
+
 
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', "your_very_secure_secret_key_here")
+app.config['SECRET_KEY'] = os.getenv(
+    'SECRET_KEY',
+    "your_very_secure_secret_key_here"
+)
 
 if not app.config['SECRET_KEY']:
     raise RuntimeError("SECRET_KEY not set in .env file!")
@@ -78,4 +83,23 @@ def show_url(id):
     url_data = get_url_by_id(id)
     if url_data is None:
         abort(404, description="Страница не найдена")
-    return render_template('urls_show.html', url=url_data)
+
+    checks_data = get_url_checks(id)
+
+    return render_template('urls_show.html', url=url_data, checks=checks_data)
+
+
+@app.route('/urls/<int:id>/checks', methods=['POST'])
+def add_url_check(id):
+    url_item = get_url_by_id(id)
+    if url_item is None:
+        abort(404, description="URL не найден, проверку добавить нельзя")
+
+    success = insert_url_check(id)
+
+    if success:
+        flash('Страница успешно проверена', 'success')
+    else:
+        flash('Произошла ошибка при проверке страницы', 'danger')
+
+    return redirect(url_for('show_url', id=id))

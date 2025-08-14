@@ -72,15 +72,68 @@ def insert_url(url_name):
 
 def get_all_urls():
     conn = get_db_connection()
-    urls_data = []
+    urls_list = []
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT id, name FROM urls ORDER BY id DESC;")
-            urls_data = cur.fetchall()
+            cur.execute(
+                """
+                SELECT
+                    urls.id,
+                    urls.name,
+                    MAX(url_checks.created_at) as last_check_date
+                FROM urls
+                LEFT JOIN url_checks ON urls.id = url_checks.url_id
+                GROUP BY urls.id, urls.name
+                ORDER BY urls.id DESC;
+                """
+            )
+            urls_list = cur.fetchall()
     finally:
         if conn:
             conn.close()
-    return urls_data
+    return urls_list
+
+
+def insert_url_check(url_id):
+    conn = get_db_connection()
+    success = False
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO url_checks (url_id) VALUES (%s)",
+                (url_id,)
+            )
+            conn.commit()
+            success = True
+    except psycopg.Error as e:
+        conn.rollback()
+        print(f"Ошибка вставки проверки URL: {e}")
+    finally:
+        if conn:
+            conn.close()
+    return success
+
+
+def get_url_checks(url_id):
+    conn = get_db_connection()
+    checks_list = []
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, url_id, status_code, h1, title, description, created_at
+                FROM url_checks
+                WHERE url_id = %s
+                ORDER BY id DESC;
+                """,
+                (url_id,)
+            )
+            checks_list = cur.fetchall()
+    finally:
+
+        if conn:
+            conn.close()
+    return checks_list
 
 
 def init_db():
@@ -101,6 +154,7 @@ def init_db():
         conn.rollback()
     finally:
         conn.close()
+
 
 if __name__ == "__main__":
     init_db()

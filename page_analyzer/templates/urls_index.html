@@ -19,12 +19,13 @@
                 <tr>
                     <td>{{ url_item[0] }}</td>
                     <td><a href="{{ url_for('show_url', id=url_item[0]) }}">{{ url_item[1] }}</a></td>
+                    <td>
+                        {% if url_item[2] %}
+                        {{ url_item[2] }}
+                        {% else %}
+                        {% endif %}
+                    </td>
                     <td></td>
-                    <td></td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="4">Пока не добавлено ни одного сайта</td>
                 </tr>
                 {% endfor %}
             </tbody>
